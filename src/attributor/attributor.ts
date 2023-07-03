@@ -5,7 +5,7 @@ export interface AttributorOptions {
   whitelist?: string[];
 }
 
-export default class Attributor {
+export default class Attributor<AttrName extends string = string> {
   public static keys(node: HTMLElement): string[] {
     return Array.from(node.attributes).map((item: Attr) => item.name);
   }
@@ -14,7 +14,7 @@ export default class Attributor {
   public whitelist: string[] | undefined;
 
   constructor(
-    public readonly attrName: string,
+    public readonly attrName: AttrName,
     public readonly keyName: string,
     options: AttributorOptions = {},
   ) {

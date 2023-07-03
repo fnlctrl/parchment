@@ -16,7 +16,23 @@ export interface RegistryInterface {
   register(...definitions: any[]): any;
 }
 
-export default class Registry implements RegistryInterface {
+export default class Registry<
+  KnownBlots extends BlotConstructor = BlotConstructor,
+  KnownAttributors extends Attributor = Attributor,
+> implements RegistryInterface
+{
+  /**
+   * `KnownBlots` are blots that are statically provided to the Registry at instantiation.
+   * This allow TS to store the typing information in class generic parameters,
+   * allowing e.g. `registry.create('image')`'s return type to be `ImageBlot`.
+   *
+   * Same for `KnownAttributors`, allowing `registry.query('indent')`'s return type to be `IndentAttributor`
+   */
+  constructor(blots?: KnownBlots[], attributors?: KnownAttributors[]) {
+    blots && this.register(...blots);
+    attributors && this.register(...attributors);
+  }
+
   public static blots = new WeakMap<Node, Blot>();
 
   public static find(node?: Node | null, bubble = false): Blot | null {
@@ -47,7 +63,13 @@ export default class Registry implements RegistryInterface {
   private tags: { [key: string]: BlotConstructor } = {};
   private types: { [key: string]: RegistryDefinition } = {};
 
-  public create(scroll: Root, input: Node | string | Scope, value?: any): Blot {
+  public create<Input extends Node | string | Scope>(
+    scroll: Root,
+    input: Input,
+    value?: any,
+  ): Input extends KnownBlots['blotName']
+    ? InstanceType<Extract<KnownBlots, { blotName: Input }>>
+    : Blot {
     const match = this.query(input);
     if (match == null) {
       throw new ParchmentError(`Unable to create ${input} blot`);
@@ -60,14 +82,20 @@ export default class Registry implements RegistryInterface {
     return blot as any;
   }
 
-  public find(node: Node | null, bubble = false): Blot | null {
+  public find(node?: Node | null, bubble = false): Blot | null {
     return Registry.find(node, bubble);
   }
 
-  public query(
-    query: string | Node | Scope,
+  public query<Query extends Node | string | Scope>(
+    query: Query,
     scope: Scope = Scope.ANY,
-  ): RegistryDefinition | null {
+  ):
+    | (Query extends KnownBlots['blotName']
+        ? Extract<KnownBlots, { blotName: Query }>
+        : Query extends KnownAttributors['attrName']
+        ? Extract<KnownAttributors, { attrName: Query }>
+        : RegistryDefinition)
+    | null {
     let match;
     if (typeof query === 'string') {
       match = this.types[query] || this.attributes[query];
@@ -98,7 +126,7 @@ export default class Registry implements RegistryInterface {
       scope & Scope.LEVEL & match.scope &&
       scope & Scope.TYPE & match.scope
     ) {
-      return match;
+      return match as any;
     }
     return null;
   }

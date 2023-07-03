@@ -9,7 +9,9 @@ function camelize(name: string): string {
   return parts[0] + rest;
 }
 
-class StyleAttributor extends Attributor {
+class StyleAttributor<
+  AttrName extends string = string,
+> extends Attributor<AttrName> {
   private styleKey = assertValidStyleKey(camelize(this.keyName));
   public static keys(node: HTMLElement): string[] {
     return (node.getAttribute('style') || '').split(';').map((value) => {

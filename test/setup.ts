@@ -1,11 +1,12 @@
 import {
   Registry,
   ScrollBlot,
-  BlockBlot,
-  InlineBlot,
-  TextBlot,
+  BlockBlot as BlockBlotBase,
+  InlineBlot as InlineBlotBase,
+  TextBlot as TextBlotBase,
   type BlotConstructor,
 } from '../src/parchment';
+
 import {
   AuthorBlot,
   BoldBlot,
@@ -18,28 +19,53 @@ import { ImageBlot, VideoBlot } from './registry/embed';
 import { ListContainer, ListItem } from './registry/list';
 import { BreakBlot } from './registry/break';
 
+// Create subclasses to allow marking `blotName` as readonly for TypeScript inference
+// We can't do it on the base classes because it would prevent subclasses from having different blot names
+class BlockBlot extends BlockBlotBase {
+  static readonly blotName = 'block';
+}
+class InlineBlot extends InlineBlotBase {
+  static readonly blotName = 'inline';
+}
+class TextBlot extends TextBlotBase {
+  static readonly blotName = 'text';
+}
+
+const Blots = [
+  // Essential blots
+  BlockBlot,
+  InlineBlot,
+  TextBlot,
+  // Format blots
+  AuthorBlot,
+  BoldBlot,
+  ItalicBlot,
+  ScriptBlot,
+  HeaderBlot,
+  ImageBlot,
+  VideoBlot,
+  ListItem,
+  ListContainer,
+  BreakBlot,
+];
+
+const Attributors = [Color, Size, Family, Id, Align, Indent];
+
+type KnownBlots = typeof Blots[number];
+type KnownAttributors = typeof Attributors[number];
+
 const getTestRegistry = () => {
-  const reg = new Registry();
+  const reg = new Registry(Blots, Attributors);
 
   reg.register(ScrollBlot as unknown as BlotConstructor);
-  reg.register(BlockBlot);
-  reg.register(InlineBlot);
-  reg.register(TextBlot);
-  reg.register(AuthorBlot, BoldBlot, ItalicBlot, ScriptBlot);
-
-  reg.register(Color, Size, Family, Id, Align, Indent);
-  reg.register(HeaderBlot);
-  reg.register(ImageBlot, VideoBlot);
-  reg.register(ListItem, ListContainer);
-  reg.register(BreakBlot);
 
   return reg;
 };
 
 type TestContext = {
   container: HTMLElement;
-  scroll: ScrollBlot;
-  registry: Registry;
+  scroll: ScrollBlot<KnownBlots, KnownAttributors>;
+  registry: Registry<KnownBlots, KnownAttributors>;
 };
 
 export const setupContextBeforeEach = () => {

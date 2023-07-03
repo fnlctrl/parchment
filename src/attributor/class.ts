@@ -7,7 +7,9 @@ function match(node: HTMLElement, prefix: string): string[] {
     .filter((name) => name.indexOf(`${prefix}-`) === 0);
 }
 
-class ClassAttributor extends Attributor {
+class ClassAttributor<
+  AttrName extends string = string,
+> extends Attributor<AttrName> {
   public static keys(node: HTMLElement): string[] {
     return (node.getAttribute('class') || '')
       .split(/\s+/)

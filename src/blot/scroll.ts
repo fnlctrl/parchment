@@ -1,9 +1,11 @@
+import Attributor from '../attributor/attributor';
 import Registry, { type RegistryDefinition } from '../registry';
 import Scope from '../scope';
 import type { Blot, BlotConstructor, Root } from './abstract/blot';
 import ContainerBlot from './abstract/container';
 import ParentBlot from './abstract/parent';
 import BlockBlot from './block';
+import type InlineBlot from './inline';
 
 const OBSERVER_CONFIG = {
   attributes: true,
@@ -15,16 +17,25 @@ const OBSERVER_CONFIG = {
 
 const MAX_OPTIMIZE_ITERATIONS = 100;
 
-class ScrollBlot extends ParentBlot implements Root {
+class ScrollBlot<
+    KnownBlots extends BlotConstructor = BlotConstructor,
+    KnownAttributors extends Attributor = Attributor,
+  >
+  extends ParentBlot
+  implements Root
+{
   public static blotName = 'scroll';
   public static defaultChild = BlockBlot;
-  public static allowedChildren: BlotConstructor[] = [BlockBlot, ContainerBlot];
+  public static allowedChildren = [BlockBlot, ContainerBlot];
   public static scope = Scope.BLOCK_BLOT;
   public static tagName = 'DIV';
 
   public observer: MutationObserver;
 
-  constructor(public registry: Registry, node: HTMLDivElement) {
+  constructor(
+    public registry: Registry<KnownBlots, KnownAttributors>,
+    node: HTMLDivElement,
+  ) {
     super(null as any /* scroll is the root with no parent */, node);
     this.scroll = this;
     this.build();
@@ -35,26 +46,42 @@ class ScrollBlot extends ParentBlot implements Root {
     this.attach();
   }
 
-  public create(input: Node | string | Scope, value?: any): Blot {
-    return this.registry.create(this, input, value);
+  public create<Input extends Node | string | Scope>(
+    input: Input,
+    value?: any,
+  ): Input extends HTMLParagraphElement // special case: call create() with block level element (<p>, <h1>, etc.)
+    ? BlockBlot
+    : Input extends KnownBlots['blotName']
+    ? InstanceType<Extract<KnownBlots, { blotName: Input }>>
+    : Blot {
+    return this.registry.create(this, input, value) as any;
   }
 
-  public find(node: Node | null, bubble = false): Blot | null {
+  public find<Input extends Node>(
+    node?: Input | null,
+    bubble = false,
+  ): (Input extends HTMLSpanElement ? InlineBlot : Blot) | null {
     const blot = this.registry.find(node, bubble);
     if (!blot) {
       return null;
     }
     if (blot.scroll === this) {
-      return blot;
+      return blot as any;
     }
-    return bubble ? this.find(blot.scroll.domNode.parentNode, true) : null;
+    return (
+      bubble ? this.find(blot.scroll.domNode.parentNode, true) : null
+    ) as any;
   }
 
-  public query(
-    query: string | Node | Scope,
+  public query<Query extends Node | string | Scope>(
+    query: Query,
     scope: Scope = Scope.ANY,
-  ): RegistryDefinition | null {
-    return this.registry.query(query, scope);
+  ):
+    | (Query extends KnownAttributors['attrName']
+        ? Extract<KnownAttributors, { attrName: Query }>
+        : RegistryDefinition)
+    | null {
+    return this.registry.query(query, scope) as any;
   }
 
   public register(...definitions: RegistryDefinition[]) {
