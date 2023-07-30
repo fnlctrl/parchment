@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import type { BlockBlot, InlineBlot } from '../../src/parchment';
 import type { ImageBlot } from '../registry/embed';
 import { setupContextBeforeEach } from '../setup';

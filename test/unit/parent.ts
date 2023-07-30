@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import LeafBlot from '../../src/blot/abstract/leaf';
 import ParentBlot from '../../src/blot/abstract/parent';
 import ShadowBlot from '../../src/blot/abstract/shadow';

@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { setupContextBeforeEach } from '../setup';
 
 describe('scroll', function () {
@@ -75,18 +76,20 @@ describe('scroll', function () {
     expect(wrapper.firstChild).toEqual(ctx.scroll.domNode);
   });
 
-  it('detach', function (done) {
-    spyOn(ctx.scroll, 'optimize').and.callThrough();
+  it('detach', async function () {
+    vi.spyOn(ctx.scroll, 'optimize');
     ctx.scroll.domNode.innerHTML = 'Test';
-    setTimeout(() => {
-      expect(ctx.scroll.optimize).toHaveBeenCalledTimes(1);
-      ctx.scroll.detach();
-      ctx.scroll.domNode.innerHTML = '!';
+    await new Promise<void>((resolve) => {
       setTimeout(() => {
         expect(ctx.scroll.optimize).toHaveBeenCalledTimes(1);
-        done();
+        ctx.scroll.detach();
+        ctx.scroll.domNode.innerHTML = '!';
+        setTimeout(() => {
+          expect(ctx.scroll.optimize).toHaveBeenCalledTimes(1);
+          resolve();
+        }, 1);
       }, 1);
-    }, 1);
+    });
   });
 
   describe('scroll reference', function () {

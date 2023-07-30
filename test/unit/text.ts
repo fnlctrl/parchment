@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import TextBlot from '../../src/blot/text';
 import type { BlockBlot, InlineBlot } from '../../src/parchment';
 import { setupContextBeforeEach } from '../setup';

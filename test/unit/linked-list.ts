@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import LinkedList from '../../src/collection/linked-list';
 import type { LinkedNode } from '../../src/parchment';
 
@@ -132,15 +133,15 @@ describe('LinkedList', function () {
   });
 
   describe('iteration', function () {
-    let spy: any; // todo: proper typing after switching off karma
+    let spy = vi.fn();
     beforeEach(function () {
-      spy = { callback: (...args: any[]) => args };
-      spyOn(spy, 'callback');
+      // spy = vi.fn()
+      spy.mockReset();
     });
 
     it('iterate over empty list', function () {
-      ctx.list.forEach(spy.callback);
-      expect(spy.callback.calls.count()).toBe(0);
+      ctx.list.forEach(spy);
+      expect(spy.mock.calls.length).toBe(0);
     });
 
     it('iterate non-head start', function () {
@@ -177,13 +178,12 @@ describe('LinkedList', function () {
 
     it('forEach', function () {
       ctx.list.append(ctx.a, ctx.b, ctx.c);
-      ctx.list.forEach(spy.callback);
-      expect(spy.callback.calls.count()).toBe(3);
-      let result = spy.callback.calls
-        .all()
-        .reduce(function (memo: string, call: { args: StrNode[] }) {
-          return memo + call.args[0].str;
-        }, '');
+      ctx.list.forEach(spy);
+      expect(spy.mock.calls.length).toBe(3);
+      const result = spy.mock.calls.reduce(
+        (memo: string, call: StrNode[]) => memo + call[0].str,
+        '',
+      );
       expect(result).toBe('abc');
     });
 
@@ -219,42 +219,42 @@ describe('LinkedList', function () {
 
     it('forEachAt', function () {
       ctx.list.append(ctx.a, ctx.b, ctx.c);
-      ctx.list.forEachAt(3, 3, spy.callback);
-      expect(spy.callback.calls.count()).toBe(1);
-      expect(spy.callback.calls.first().args).toEqual([ctx.b, 0, 3]);
+      ctx.list.forEachAt(3, 3, spy);
+      expect(spy.mock.calls.length).toBe(1);
+      expect(spy.mock.calls[0]).toEqual([ctx.b, 0, 3]);
     });
 
     it('forEachAt zero length nodes', function () {
       ctx.list.append(ctx.a, ctx.zero, ctx.c);
-      ctx.list.forEachAt(2, 2, spy.callback);
-      expect(spy.callback.calls.count()).toBe(3);
-      let calls = spy.callback.calls.all();
-      expect(calls[0].args).toEqual([ctx.a, 2, 1]);
-      expect(calls[1].args).toEqual([ctx.zero, 0, 0]);
-      expect(calls[2].args).toEqual([ctx.c, 0, 1]);
+      ctx.list.forEachAt(2, 2, spy);
+      expect(spy.mock.calls.length).toBe(3);
+      let calls = spy.mock.calls;
+      expect(calls[0]).toEqual([ctx.a, 2, 1]);
+      expect(calls[1]).toEqual([ctx.zero, 0, 0]);
+      expect(calls[2]).toEqual([ctx.c, 0, 1]);
     });
 
     it('forEachAt none', function () {
       ctx.list.append(ctx.a, ctx.b);
-      ctx.list.forEachAt(1, 0, spy.callback);
-      expect(spy.callback.calls.count()).toBe(0);
+      ctx.list.forEachAt(1, 0, spy);
+      expect(spy.mock.calls.length).toBe(0);
     });
 
     it('forEachAt partial nodes', function () {
       ctx.list.append(ctx.a, ctx.b, ctx.c);
-      ctx.list.forEachAt(1, 7, spy.callback);
-      expect(spy.callback.calls.count()).toBe(3);
-      let calls = spy.callback.calls.all();
-      expect(calls[0].args).toEqual([ctx.a, 1, 2]);
-      expect(calls[1].args).toEqual([ctx.b, 0, 3]);
-      expect(calls[2].args).toEqual([ctx.c, 0, 2]);
+      ctx.list.forEachAt(1, 7, spy);
+      expect(spy.mock.calls.length).toBe(3);
+      let calls = spy.mock.calls;
+      expect(calls[0]).toEqual([ctx.a, 1, 2]);
+      expect(calls[1]).toEqual([ctx.b, 0, 3]);
+      expect(calls[2]).toEqual([ctx.c, 0, 2]);
     });
 
     it('forEachAt at part of single node', function () {
       ctx.list.append(ctx.a, ctx.b, ctx.c);
-      ctx.list.forEachAt(4, 1, spy.callback);
-      expect(spy.callback.calls.count()).toBe(1);
-      expect(spy.callback.calls.first().args).toEqual([ctx.b, 1, 1]);
+      ctx.list.forEachAt(4, 1, spy);
+      expect(spy.mock.calls.length).toBe(1);
+      expect(spy.mock.calls[0]).toEqual([ctx.b, 1, 1]);
     });
   });
 });

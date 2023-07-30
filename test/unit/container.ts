@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { setupContextBeforeEach } from '../setup';
 
 describe('Container', function () {

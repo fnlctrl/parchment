@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import Scope from '../../src/scope';
 import { HeaderBlot } from '../registry/block';
 import { AuthorBlot, BoldBlot, ItalicBlot } from '../registry/inline';

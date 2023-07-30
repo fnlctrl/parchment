@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import type { BlockBlot } from '../../src/parchment';
 import type { HeaderBlot } from '../registry/block';
 import { setupContextBeforeEach } from '../setup';

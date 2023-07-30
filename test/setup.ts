@@ -1,3 +1,5 @@
+import { beforeEach } from 'vitest';
+
 import {
   Registry,
   ScrollBlot,

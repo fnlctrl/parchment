@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import LeafBlot from '../../src/blot/abstract/leaf';
 import ShadowBlot from '../../src/blot/abstract/shadow';
 import type {
@@ -225,7 +226,7 @@ describe('Lifecycle', function () {
       ctx.scroll.update();
       updateCtx.descendants = ctx.scroll.descendants(ShadowBlot) as Blots;
       updateCtx.descendants.forEach(function (blot: ShadowBlot) {
-        spyOn(blot, 'update').and.callThrough();
+        vi.spyOn(blot, 'update');
       });
       updateCtx.checkUpdateCalls = (called) => {
         updateCtx.descendants.forEach(function (blot) {
