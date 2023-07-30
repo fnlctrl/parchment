@@ -19,5 +19,5 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test:types
-        run: npx test
+      - run: npm test
         timeout-minutes: 10
